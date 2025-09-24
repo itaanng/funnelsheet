@@ -124,3 +124,13 @@ Prazo (calendário): 29/09/2025 ~ 17/10/2025
 - **Hydration mismatch em slices**: mitigado com renderização de placeholders e normalização/sanitização de dados durante deploy e revalidates.
 - **Schema duplicado**: centralizar **buildSchema()** e validação prévia deploy através de CI/CD.
 - **Consent Mode v2 mal configurado**: testar cenários de consentimento/negativa em E2E.
+
+---
+
+## Perguntas objetivas
+
+- ISR estável para picos de publicação diária? — Sim, se configurado com janela adequada + monitoramento de preview/invalidation.
+- Gerador centralizado de schema por rota existe? — Sim, via `buildSchema()`.
+- Data-layer versionado para eventos CRO? — Sim, implementado com `trackEvent()` e contrato versionado.
+- Checks de SEO/CWV no CI? — Sim, via Lighthouse CI e schema validator.
+- Fallback 404 e HTML sanitizado no blog? — Sim, garantido pelo proxy `/api/cms`.
