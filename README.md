@@ -1,7 +1,7 @@
 # Avaliação Funnelsheet - Ítalo Iung
 
 ## Tema
-Decisão técnica (Next.js vs Nuxt 3) + estimativas — Funnelsheet (Home + Blog/Prismic
+Decisão técnica (Next.js vs Nuxt 3) + estimativas — Funnelsheet (Home + Blog/Prismic)
 
 ## Contexto
 ```
@@ -71,7 +71,11 @@ No entanto, é válido salientar que o Nuxt também pode ser hospedado na Vercel
     - **Home**: pré-rendered (SSG) + **ISR** revalidate n minutos (ex.: 300s) — alta performance.
     - **Listing /blog**: SSG/ISR com reval n min (configurável).
     - **Post** `/blog/[slug]`: SSG com reval janela configurável por ambiente (ex.: 15–60 min) + Preview mode para editores.
-- **Proxy** `/api/cms`: rota de API serverless para consumir Prismic, aplicar cache (*stale-while-revalidate*), sanitizar HTML e normalizar JSON.
+    
+## Proxy `/api/cms`
+
+- **Responsabilidade**: autenticação com Prismic, **rate limiting**, normalização do JSON (transformar **RichText** em HTML tratado e blocos estruturados), adicionar **authors lookup**, **compressão** e **cache-control**.
+- **Vantagens**: **protege** tokens, **padroniza dados** (evitando *hydration mismatches*), **centraliza sanitização** e geração de schemas.
 
 ### Slices e UI
 - **SliceZone**: integra slices editoriais do Prismic, isolados da lógica de negócio.
@@ -86,36 +90,42 @@ No entanto, é válido salientar que o Nuxt também pode ser hospedado na Vercel
 
 ### SEO & CRO
 - **Meta Helpers & Schema centralizado**: utilidades `getMetaForRoute()` para renderizar os metadados inseridos via Prismic e `buildSchema()` gera JSON-LD para Organization, BreadcrumbList, BlogPosting.
-- **Sitemap e robots**: rotas /sitemap.xml e /robots.txt dinâmicas.
-- **TOC local + CTAs persistentes**: aumenta CRO e UX.
+- **Sitemap e robots**: rotas `/sitemap.xml` e `/robots.txt` dinâmicas.
+- **TOC local + CTAs persistentes**: elementos de *Table of Contents* (gerado automaticamente através de âncoras) e *Call to Actions* flutuantes.
 - **Eventos CRO**: **clicks** em CTAs, **scroll depth**, **WhatsApp**, diagnósticos, todos versionados em dataLayer.
+
+## Acessibilidade e qualidade
+
+- **Acessibilidade AA**: checklist por componente (contrast, keyboard, aria).
+- **Sanitização**: HTML do Prismic passa por sanitização central (DOMPurify server-side config) no proxy.
+- TypeScript em todo projeto; testes unitários básicos + e2e smoke (Playwright).
 
 ---
 
 ## Estimativas
 ### Arquitetura & Setup
-- Monorepo/Repo, TypeScript, lint/test: 6h
-- SEO/meta/sitemap/robots + schema base: 8h
-- Ponte CMS (proxy `/api/cms`, cache, normalização): 10h
+- Monorepo/Repo, TypeScript, lint/test: **6h**
+- SEO/meta/sitemap/robots + schema base: **8h**
+- Ponte CMS (proxy `/api/cms`, cache, normalização): **10h**
 
 ### Homepage
-- Layout + seções (hero, prova social, benefícios, CTAs): 14h
-- Eventos CRO (CTAs, scroll, WhatsApp/diagnóstico): 6h
+- Layout + seções (hero, prova social, benefícios, CTAs): **14h**
+- Eventos CRO (CTAs, scroll, WhatsApp/diagnóstico): **6h**
 
 ### Blog
-- Listagem /blog (ordenar, paginação futura, tags): 8h
-- Post /blog/[slug] (TOC, SEO/Schema Article, 404): 10h
-- Tipos Prismic (autor, post) + SliceZone: 10h
+- Listagem `/blog` (ordenar, paginação futura, tags): **8h**
+- Post `/blog/[slug]` (TOC, SEO/Schema Article, 404): **10h**
+- Tipos Prismic (autor, post) + SliceZone: **10h**
 
 ### Infra/DevOps
-- Deploy Vercel + **ISR** + observabilidade: 4h
+- Deploy Vercel + **ISR** + observabilidade: **4h**
 
 ### QA/Performance
-- Lighthouse/Core Web Vitals, schema validator, e2e smoke: 8h
+- Lighthouse/Core Web Vitals, schema validator, e2e smoke: **8h**
 
-Total estimado: 84h
-Custo (hora €Z): € (84 × Z)
-Prazo (calendário): 29/09/2025 ~ 17/10/2025
+Total estimado: **84h**
+Custo (hora €Z): **€ (84 × Z)**
+Prazo (calendário): **29/09/2025 ~ 17/10/2025**
 
 ---
 
@@ -129,8 +139,8 @@ Prazo (calendário): 29/09/2025 ~ 17/10/2025
 
 ## Perguntas objetivas
 
-- **ISR** estável para picos de publicação diária? — Sim, se configurado com janela adequada + monitoramento de preview/invalidation.
-- Gerador centralizado de schema por rota existe? — Sim, via `buildSchema()`.
-- Data-layer versionado para eventos CRO? — Sim, implementado com `trackEvent()` e contrato versionado.
-- Checks de SEO/CWV no CI? — Sim, via Lighthouse CI e schema validator.
-- Fallback 404 e HTML sanitizado no blog? — Sim, garantido pelo proxy `/api/cms`.
+- `ISR estável para picos de publicação diária?` — Sim, se configurado com janela adequada + monitoramento de preview/invalidation.
+- `Gerador centralizado de schema por rota existe?` — Sim, via `buildSchema()`.
+- `Data-layer versionado para eventos CRO?` — Sim, implementado com `trackEvent()` e contrato versionado.
+- `Checks de SEO/CWV no CI?` — Sim, via Lighthouse CI e schema validator.
+- `Fallback 404 e HTML sanitizado no blog?` — Sim, garantido pelo proxy `/api/cms`.
